@@ -2,7 +2,8 @@
 ## Extended Teardown API - DLL
 
 > [!Caution]
-> This DLL is compatible with Teardown 1.7.0+. It may not work with newer versions of the game.
+> This DLL is compatible with Teardown 2.0.4+. It may not work with newer versions of the game.
+> Do NOT use in Multiplayer.
 
 ### What it does:
 - Provides a DLL that can be used to extend the Teardown API.
@@ -417,7 +418,6 @@ CompleteAchievement
 DeleteShape
 DisableCrouch
 FxEmitSmokeCPP
-GenerateSessionName
 GetActionByButton
 GetBodyHit
 GetBodyHitsCount
@@ -430,6 +430,7 @@ GetKeyByAction
 GetLayoutActions
 GetPlayerToolRecoil
 GetShapeStrength
+GetUserName
 HasInputController
 IndicateAchievementProgress
 IsAchievementCompleted
@@ -491,6 +492,7 @@ SetShapeStrength
 SetVehicleEngineHealth
 TornadoBodiesSuctionCPP
 TornadoSpawnParticlesCPP
+UiDisableReplication
 UiDrawLater
 UiEnableMenuSync
 UiForceMouse

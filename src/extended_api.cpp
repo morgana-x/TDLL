@@ -36,10 +36,10 @@ namespace Teardown {
 }
 
 template<typename T>
-T* GetEntity(unsigned int handle, uint8_t type) {
+T* GetEntity(int handle, uint8_t type) {
 	Game* game = Teardown::GetGame();
-	if (handle < game->scene->entities.getSize()) {
-		Entity* entity = game->scene->entities[handle];
+	if (handle < (int)game->scene->server_entities.getSize()) {
+		Entity* entity = game->scene->server_entities[handle];
 		if (entity->type == type)
 			return (T*)entity;
 	}
@@ -47,7 +47,7 @@ T* GetEntity(unsigned int handle, uint8_t type) {
 }
 
 int GetDllVersion(lua_State* L) {
-	td_lua_pushstring(L, "v1.7.0.0701");
+	td_lua_pushstring(L, "v2.0.4.0724");
 	return 1;
 }
 

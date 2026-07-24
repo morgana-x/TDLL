@@ -1,10 +1,10 @@
 TARGET = winmm.dll
 
 CXX = g++
-CXXFLAGS = -Wall -Wextra -Werror -Wpedantic -O3 #-g
-CXXFLAGS += -shared -static -D_USE_CURL #-D_DEBUG_CONSOLE -D_TDC
+CXXFLAGS = -Wall -Wextra -Werror -Wpedantic -O3 -g
+CXXFLAGS += -shared -static -D_USE_CURL -D_DEBUG_CONSOLE #-D_TDC
 CXXFLAGS += -Iimgui
-CXXFLAGS += -Wno-missing-field-initializers
+CXXFLAGS += -Wno-missing-field-initializers -Wno-array-bounds
 CXXFLAGS += -Wno-invalid-offsetof -Wno-unused-parameter -Wno-cast-function-type
 CXXFLAGS += `pkg-config --cflags --static libcurl glfw3 lua5.1`
 

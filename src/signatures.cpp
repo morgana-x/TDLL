@@ -33,13 +33,25 @@ const char* luaCreateTablePattern =
 	"49 8B 41 70"
 	"49 39 41 78"
 	"72 05";
-
+/*
 const char* getFlashlightPattern =
 	"48 8B 05 ????????"
 	"48 8B 48 50"
 	"48 8B 91 80000000"
 	"49 8B C8"
-	"8B 52 0C";
+	"8B 52 0C"
+	"E9 93 FF 19 00";
+*/
+const char* getBodyMassPattern =
+	"40 53"
+	"48 83 EC 20"
+	"49 8B D8"
+	"48 8B CA"
+	"45 33 C0"
+	"33 D2"
+	"E8 ????????"		// CALL LuaReadInt
+	"48 8B 0D ????????" // MOV RCX, [game]
+	"0F 57 C9";
 
 const char* initScriptInnerLoopPattern =
 	"48 89 5C 24 08"

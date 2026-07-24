@@ -76,6 +76,7 @@ namespace EntityType {
 	const uint8_t Trigger = 10;
 	const uint8_t Script = 11;
 	const uint8_t Animator = 12;
+	const uint8_t Rig = 13;
 };
 
 namespace LightType {
@@ -97,7 +98,7 @@ struct Entity {
 	uint8_t padding1[0x08];
 	uint8_t type;		// 0x08
 	uint8_t padding2[0x03];
-	uint32_t handle;	// 0x0C
+	int32_t handle;		// 0x0C
 	uint8_t padding3[0x30];
 }; // 0x40
 
@@ -231,32 +232,32 @@ struct LuaStateInfo {
 };
 
 struct ScriptCoreInner {
-	uint8_t padding[0x30];
-	LuaStateInfo* state_info;	// 0x30
+	uint8_t padding[0x38];
+	LuaStateInfo* state_info;	// 0x38
 };
 
-static_assert(sizeof(ScriptCoreInner) == 0x38, "Wrong ScriptCoreInner size");
-static_assert(offsetof(ScriptCoreInner, state_info) == 0x30, "Wrong offset sci->state_info");
+static_assert(sizeof(ScriptCoreInner) == 0x40, "Wrong ScriptCoreInner size");
+static_assert(offsetof(ScriptCoreInner, state_info) == 0x38, "Wrong offset sci->state_info");
 
 struct InternalCheck {
-	uint8_t padding[0x3AC];
-	uint32_t privilege;		// 0x3AC
+	uint8_t padding[0x3C0];
+	uint32_t privilege;		// 0x3C0
 };
 
-static_assert(offsetof(InternalCheck, privilege) == 0x3AC, "Wrong offset ic->privilege");
+static_assert(offsetof(InternalCheck, privilege) == 0x3C0, "Wrong offset ic->privilege");
 
 struct ScriptCore {
 	uint8_t padding1[0x10];
 	td_string path;					// 0x10
-	uint8_t padding2[0x30];
-	ScriptCoreInner inner_core;		// 0x60
-	uint8_t padding3[0x220];
-	InternalCheck* check_internal;	// 0x2B8
+	uint8_t padding2[0x38];
+	ScriptCoreInner inner_core;		// 0x68
+	uint8_t padding3[0x378];
+	InternalCheck* check_internal;	// 0x420
 };
 
 static_assert(offsetof(ScriptCore, path) == 0x10, "Wrong offset sc->path");
-static_assert(offsetof(ScriptCore, inner_core) == 0x60, "Wrong offset sc->inner_core");
-static_assert(offsetof(ScriptCore, check_internal) == 0x2B8, "Wrong offset sc->check_internal");
+static_assert(offsetof(ScriptCore, inner_core) == 0x68, "Wrong offset sc->inner_core");
+static_assert(offsetof(ScriptCore, check_internal) == 0x420, "Wrong offset sc->check_internal");
 
 class Script : public Entity {
 public:
@@ -336,17 +337,20 @@ struct Scene {
 	Environment* environment;		// 0x50
 	uint8_t padding3[0xA0];
 	Vec3 sv_size;					// 0xF8
-	uint8_t padding4[0x494];
-	td_vector<Vec2> boundary;		// 0x598
-	uint8_t padding5[0x428];
-	td_vector<Entity*> entities;	// 0x9D0
+	uint8_t padding4[0x104];
+	td_vector<Entity*> client_entities;	// 0x208
+	uint8_t padding5[0x3B0];
+	td_vector<Vec2> boundary;			// 0x5C8 TODO: find offset
+	uint8_t padding6[0x440];
+	td_vector<Entity*> server_entities;	// 0xA18
 };
 
 static_assert(offsetof(Scene, firesystem) == 0x38, "Wrong offset scene->firesystem");
 static_assert(offsetof(Scene, environment) == 0x50, "Wrong offset scene->environment");
 static_assert(offsetof(Scene, sv_size) == 0xF8, "Wrong offset scene->sv_size");
-static_assert(offsetof(Scene, boundary) == 0x598, "Wrong offset scene->boundary");
-static_assert(offsetof(Scene, entities) == 0x9D0, "Wrong offset scene->entities");
+static_assert(offsetof(Scene, boundary) == 0x5C8, "Wrong offset scene->boundary");
+static_assert(offsetof(Scene, client_entities) == 0x208, "Wrong offset scene->client_entities");
+static_assert(offsetof(Scene, server_entities) == 0xA18, "Wrong offset scene->server_entities");
 
 struct Heat {
 	Shape* shape;

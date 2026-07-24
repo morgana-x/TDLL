@@ -32,7 +32,8 @@ extern t_InitScriptInnerLoop td_InitScriptInnerLoop;
 
 extern const char* luaPushStringPattern;
 extern const char* luaCreateTablePattern;
-extern const char* getFlashlightPattern;
+//extern const char* getFlashlightPattern;
+extern const char* getBodyMassPattern;
 extern const char* initScriptInnerLoopPattern;
 
 #endif

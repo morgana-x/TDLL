@@ -411,26 +411,42 @@ DWORD WINAPI MainThread(LPVOID lpThreadParameter) {
 	Hook::Init();
 	Hook::Create(L"opengl32.dll", "wglSwapBuffers", wglSwapBuffersHook, &td_wglSwapBuffers);
 	Hook::Create(L"dxgi.dll", "CreateDXGIFactory1", CreateDXGIFactory1Hook, &td_CreateDXGIFactory1);
-	Sleep(1000);
+	Sleep(1500);
 
 	moduleBase = GetModuleHandleA("teardown.exe");
 	td_lua_pushstring = (t_lua_pushstring)FindPatternInModule(moduleBase, luaPushStringPattern);
 	td_lua_createtable = (t_lua_createtable)FindPatternInModule(moduleBase, luaCreateTablePattern);
 	t_InitScriptInnerLoop isil_addr = (t_InitScriptInnerLoop)FindPatternInModule(moduleBase, initScriptInnerLoopPattern);
-	uintptr_t get_flashlight_addr = FindPatternInModule(moduleBase, getFlashlightPattern);
-	if (!td_lua_pushstring || !td_lua_createtable || !get_flashlight_addr || !isil_addr) {
+	uintptr_t get_body_mass_addr = FindPatternInModule(moduleBase, getBodyMassPattern);
+	if (!td_lua_pushstring || !td_lua_createtable || !get_body_mass_addr || !isil_addr) {
 		MessageBoxA(nullptr, "TDLL is not compatible with this version of Teardown.\nPlease update or remove.", "TDLL - Invalid version", MB_ICONERROR | MB_OK);
 		return 0;
 	}
 
-	// MOV RAX, [game]
-	const int MOV_HEADER_SIZE = 3;
+	// MOV RCX, [game]
+	const int OFFSET_TO_GAME_PTR = 25; // From the start of GetBodyMass()
 	const int MOV_INSTRUCTION_SIZE = 7;
 	uint32_t game_addr_offset = 0;
-	memcpy(&game_addr_offset, (void*)(get_flashlight_addr + MOV_HEADER_SIZE), sizeof(uint32_t));
-	//uintptr_t get_flashlight_offset = get_flashlight_addr - (uintptr_t)moduleBase;
-	//MEM_OFFSET::Game = get_flashlight_offset + game_addr_offset + MOV_INSTRUCTION_SIZE;
-	game_ptr = *(Game**)(get_flashlight_addr + game_addr_offset + MOV_INSTRUCTION_SIZE);
+	memcpy(&game_addr_offset, (void*)(get_body_mass_addr + OFFSET_TO_GAME_PTR), sizeof(uint32_t));
+	game_ptr = (Game*)(get_body_mass_addr + MOV_INSTRUCTION_SIZE + game_addr_offset);
+
+	uintptr_t actual_address = (uintptr_t)moduleBase + 0x1C760B0;
+	if ((uintptr_t)game_ptr != actual_address) {
+		printf("[INFO] GetBodyMass address: %p\n", (void*)get_body_mass_addr);
+		printf("[INFO] Game address offset: %x\n", game_addr_offset);
+		printf("[ERROR] Game pointer address mismatch: expected %p, got %p\n", (void*)actual_address, (void*)game_ptr);
+		game_ptr = (Game*)actual_address;
+	}
+
+/*
+TODO: fix
+[INFO] GetBodyMass address: 00007ff775220b80
+[INFO] Game address offset: 1805513
+[ERROR] Game pointer address mismatch: expected 
+00007ff776a260b0, got 
+00007ff776a2609a
+-0x16
+*/
 
 	Hook::Create(isil_addr, InitScriptInnerLoopHook, &td_InitScriptInnerLoop, "InitScriptInnerLoop");
 #ifdef _TDC
