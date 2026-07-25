@@ -330,25 +330,35 @@ struct Environment {
 
 static_assert(offsetof(Environment, sun_length) == 0x114, "Wrong offset env->sun_length");
 
+struct BoundaryProxy {
+	uint8_t padding1[0x208];
+	td_vector<Vec2> boundary;	// 0x208
+};
+
+static_assert(offsetof(BoundaryProxy, boundary) == 0x208, "Wrong offset proxy->boundary");
+
 struct Scene {
 	uint8_t padding1[0x38];
-	FireSystem* firesystem;			// 0x38
+	FireSystem* firesystem;				// 0x38
 	uint8_t padding2[0x10];
-	Environment* environment;		// 0x50
+	Environment* environment;			// 0x50
 	uint8_t padding3[0xA0];
-	Vec3 sv_size;					// 0xF8
+	Vec3 sv_size;						// 0xF8
 	uint8_t padding4[0x104];
 	td_vector<Entity*> client_entities;	// 0x208
-	uint8_t padding5[0x3B0];
-	td_vector<Vec2> boundary;			// 0x5C8 TODO: find offset
-	uint8_t padding6[0x440];
+	uint8_t padding5[0xC8];
+	BoundaryProxy* proxy;				// 0x2E0
+	uint8_t padding6[0x2E0];
+	bool has_boundary;					// 0x5C8
+	uint8_t padding7[0x44F];
 	td_vector<Entity*> server_entities;	// 0xA18
 };
 
 static_assert(offsetof(Scene, firesystem) == 0x38, "Wrong offset scene->firesystem");
 static_assert(offsetof(Scene, environment) == 0x50, "Wrong offset scene->environment");
 static_assert(offsetof(Scene, sv_size) == 0xF8, "Wrong offset scene->sv_size");
-static_assert(offsetof(Scene, boundary) == 0x5C8, "Wrong offset scene->boundary");
+static_assert(offsetof(Scene, proxy) == 0x2E0, "Wrong offset scene->proxy");
+static_assert(offsetof(Scene, has_boundary) == 0x5C8, "Wrong offset scene->has_boundary");
 static_assert(offsetof(Scene, client_entities) == 0x208, "Wrong offset scene->client_entities");
 static_assert(offsetof(Scene, server_entities) == 0xA18, "Wrong offset scene->server_entities");
 

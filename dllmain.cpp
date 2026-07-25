@@ -117,8 +117,11 @@ void ImGuiRenderFrame() {
 	}*/
 
 	if (ImGui::Checkbox("Remove boundaries", &awwnb) && awwnb) {
-		Game* game = (Game*)Teardown::GetGame();
-		game->scene->boundary.clear();
+		Game* game = Teardown::GetGame();
+		if (game != NULL && game->scene != NULL) {
+			game->scene->has_boundary = false;
+			//game->scene->proxy->boundary.clear();
+		}
 	}
 	ImGui::BeginDisabled();
 	static bool telemetry_disabled = !TELEMETRY_ENABLED;
@@ -144,7 +147,7 @@ void ImGuiRenderFrame() {
 	ImGui::End();
 
 	/*if (show_vertex_editor) {
-		Game* game = (Game*)Teardown::GetGame();
+		Game* game = Teardown::GetGame();
 		if (game->editor != NULL && game->editor->selected != NULL) {
 			ImGui::Begin("Vertex Editor", &show_vertex_editor);
 			ImGui::Text("Entity type:");
@@ -424,29 +427,12 @@ DWORD WINAPI MainThread(LPVOID lpThreadParameter) {
 	}
 
 	// MOV RCX, [game]
-	const int OFFSET_TO_GAME_PTR = 25; // From the start of GetBodyMass()
-	const int MOV_INSTRUCTION_SIZE = 7;
+	const int MOV_INSTR_SIZE = 7;
+	const int MOV_HEADER_SIZE = 3;
+	const int OFFSET_TO_GAME_PTR = 25;
 	uint32_t game_addr_offset = 0;
 	memcpy(&game_addr_offset, (void*)(get_body_mass_addr + OFFSET_TO_GAME_PTR), sizeof(uint32_t));
-	game_ptr = (Game*)(get_body_mass_addr + MOV_INSTRUCTION_SIZE + game_addr_offset);
-
-	uintptr_t actual_address = (uintptr_t)moduleBase + 0x1C760B0;
-	if ((uintptr_t)game_ptr != actual_address) {
-		printf("[INFO] GetBodyMass address: %p\n", (void*)get_body_mass_addr);
-		printf("[INFO] Game address offset: %x\n", game_addr_offset);
-		printf("[ERROR] Game pointer address mismatch: expected %p, got %p\n", (void*)actual_address, (void*)game_ptr);
-		game_ptr = (Game*)actual_address;
-	}
-
-/*
-TODO: fix
-[INFO] GetBodyMass address: 00007ff775220b80
-[INFO] Game address offset: 1805513
-[ERROR] Game pointer address mismatch: expected 
-00007ff776a260b0, got 
-00007ff776a2609a
--0x16
-*/
+	game_ptr = *(Game**)(get_body_mass_addr + OFFSET_TO_GAME_PTR + MOV_INSTR_SIZE - MOV_HEADER_SIZE + game_addr_offset);
 
 	Hook::Create(isil_addr, InitScriptInnerLoopHook, &td_InitScriptInnerLoop, "InitScriptInnerLoop");
 #ifdef _TDC

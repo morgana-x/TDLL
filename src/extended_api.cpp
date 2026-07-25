@@ -135,10 +135,10 @@ int GetSystemTime(lua_State* L) {
 
 int GetBoundaryVertices(lua_State* L) {
 	Game* game = Teardown::GetGame();
-	unsigned int n = game->scene->boundary.getSize();
+	unsigned int n = game->scene->proxy->boundary.getSize();
 	td_lua_createtable(L, n, 0);
 	for (unsigned int i = 0; i < n; i++) {
-		Vec2 vertex = game->scene->boundary[i];
+		Vec2 vertex = game->scene->proxy->boundary[i];
 		LuaPushVec3(L, Vec3(vertex.x, 0, vertex.y));
 		lua_rawseti(L, -2, i + 1);
 	}
@@ -147,7 +147,8 @@ int GetBoundaryVertices(lua_State* L) {
 
 int RemoveBoundary(lua_State* L) {
 	Game* game = Teardown::GetGame();
-	game->scene->boundary.clear();
+	game->scene->has_boundary = false;
+	game->scene->proxy->boundary.clear();
 	return 0;
 }
 
@@ -155,8 +156,8 @@ int SetBoundaryVertex(lua_State* L) {
 	unsigned int index = lua_tointeger(L, 1);
 	Vec3 pos = LuaToVec3(L, 2);
 	Game* game = Teardown::GetGame();
-	if (index < game->scene->boundary.getSize())
-		game->scene->boundary[index] = Vec2(pos.x, pos.z);
+	if (index < game->scene->proxy->boundary.getSize())
+		game->scene->proxy->boundary[index] = Vec2(pos.x, pos.z);
 	return 0;
 }
 
