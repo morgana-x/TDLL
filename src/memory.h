@@ -32,6 +32,8 @@ namespace Hook {
 
 		MH_STATUS status;
 		status = MH_CreateHook((LPVOID)target, (LPVOID)hook, (LPVOID*)original);
+		if (status == MH_ERROR_ALREADY_CREATED)
+			return;
 		if (status != MH_OK) {
 			printf("MH_CreateHook for %s failed: %s\n", target_name, MH_StatusToString(status));
 			return;

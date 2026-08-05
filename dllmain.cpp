@@ -13,6 +13,8 @@
 #include "src/extended_api.h"
 #include "src/winmm_proxy.h"
 
+#define IMGUI_DISABLE_OBSOLETE_FUNCTIONS 1
+
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 #include "imgui/backends/imgui_impl_win32.h"
@@ -69,6 +71,7 @@ void ProcessVideoFrameGLHook(ScreenCapture* sc, int frame) {
 HMODULE moduleBase;
 bool show_menu = false;
 WNDPROC hGameWindowProc;
+bool imGuiInitialized = false;
 ID3D12CommandQueue* d3d12CommandQueue = nullptr;
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -220,7 +223,6 @@ void ImGuiRenderFrame() {
 }
 
 BOOL wglSwapBuffersHook(HDC hDc) {
-	static bool imGuiInitialized = false;
 	if (!imGuiInitialized) {
 		imGuiInitialized = true;
 		HWND hGameWindow = WindowFromDC(hDc);
@@ -262,7 +264,6 @@ HRESULT PresentHook(IDXGISwapChain3* swapChain, UINT syncInterval, UINT flags) {
 	static ID3D12DescriptorHeap* d3d12DescriptorHeapImGuiRender = nullptr;
 	static ID3D12DescriptorHeap* d3d12DescriptorHeapBackBuffers = nullptr;
 
-	static bool imGuiInitialized = false;
 	if (!imGuiInitialized) {
 		imGuiInitialized = true;
 
@@ -315,11 +316,35 @@ HRESULT PresentHook(IDXGISwapChain3* swapChain, UINT syncInterval, UINT flags) {
 
 		ImGui::CreateContext();
 		ImGui_ImplWin32_Init(hGameWindow);
-		ImGui_ImplDX12_Init(d3d12Device, buffersCounts,
+		/*ImGui_ImplDX12_Init(d3d12Device, buffersCounts,
 			DXGI_FORMAT_R8G8B8A8_UNORM, d3d12DescriptorHeapImGuiRender,
 			d3d12DescriptorHeapImGuiRender->GetCPUDescriptorHandleForHeapStart(),
 			d3d12DescriptorHeapImGuiRender->GetGPUDescriptorHandleForHeapStart()
-		);
+		);*/
+
+		ImGui_ImplDX12_InitInfo initInfo = {};
+		initInfo.Device = d3d12Device;
+		initInfo.CommandQueue = d3d12CommandQueue;
+		initInfo.NumFramesInFlight = buffersCounts;
+		initInfo.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+		initInfo.DSVFormat = DXGI_FORMAT_UNKNOWN;
+		initInfo.SrvDescriptorHeap = d3d12DescriptorHeapImGuiRender;
+
+		initInfo.SrvDescriptorAllocFn =
+			[](ImGui_ImplDX12_InitInfo* info,
+			D3D12_CPU_DESCRIPTOR_HANDLE* outCpuHandle,
+			D3D12_GPU_DESCRIPTOR_HANDLE* outGpuHandle)
+			{
+				*outCpuHandle = info->SrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+				*outGpuHandle = info->SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+			};
+
+		initInfo.SrvDescriptorFreeFn =
+			[](ImGui_ImplDX12_InitInfo*,
+			D3D12_CPU_DESCRIPTOR_HANDLE,
+			D3D12_GPU_DESCRIPTOR_HANDLE)
+			{ };
+		ImGui_ImplDX12_Init(&initInfo);
 
 		ImGui_ImplDX12_CreateDeviceObjects();
 		hGameWindowProc = (WNDPROC)SetWindowLongPtrW(hGameWindow, GWLP_WNDPROC, (LONG_PTR)WindowProcHook);
