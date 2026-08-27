@@ -27,6 +27,8 @@ extern t_lua_createtable td_lua_createtable;
 typedef void (*t_InitScriptInnerLoop) (ScriptCoreInner* inner_core);
 extern t_InitScriptInnerLoop td_InitScriptInnerLoop;
 
+typedef void (*t_ScriptRegisterFunction) (ScriptCoreInner* inner_core, td_string* name, lua_CFunction func);
+
 //typedef void (*t_ProcessVideoFrameGL) (ScreenCapture* sc, int frame);
 //extern t_ProcessVideoFrameGL td_ProcessVideoFrameGL;
 
@@ -35,5 +37,6 @@ extern const char* luaCreateTablePattern;
 //extern const char* getFlashlightPattern;
 extern const char* getBodyMassPattern;
 extern const char* initScriptInnerLoopPattern;
+extern const char* scriptRegisterFunctionPattern
 
 #endif

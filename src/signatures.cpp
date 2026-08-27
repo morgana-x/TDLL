@@ -66,3 +66,7 @@ const char* initScriptInnerLoopPattern =
 	"48 8B 3B"
 	"48 8B 53 08"
 	"48 8D 4C 24 20";
+
+// What the game uses to register a lua function for a ScriptCoreInner
+const char* scriptRegisterFunctionPattern = "48 89 5c 24 08 57 48 83 ec 20 48 8b f9 48 8b da 48 8b 49 38 49 8b d0 48 8b 09 e8 ?? ?? ?? ?? 48 8b 4f 38 48 8b d7 48 8b 09 e8 ?? ?? ?? ?? 48 8b 4f 38 48 ?? ?? ?? ?? ?? ?? 41 b8 02 00 00 00 48 8b 09 e8 ?? ?? ?? ?? 80 7b 1f 00 74 ?? 48 8b 1b";
+
